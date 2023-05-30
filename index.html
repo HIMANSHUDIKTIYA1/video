@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset='utf-8'>
+    <meta http-equiv='X-UA-Compatible' content='IE=edge'>
+    <title>HD videocall</title>
+    <meta name='viewport' content='width=device-width, initial-scale=1'>
+    <link rel='stylesheet' type='text/css' media='screen' href='lobby.css'>
+    <link rel="stylesheet" href="lobby.css">
+</head>
+
+<body>
+    <div include-html="video.html"></div>
+
+    <main id="lobby-container">
+        <div id="form-container">
+            <div id="form__container__header">
+                <p>👋 Create OR Join a Room</p>
+            </div>
+
+            <div id="form__content__wrapper">
+                <form id="join-form">
+                    <input type="password" name="invite_link" required/>
+                <input type="submit" class="hw" value="join room" > 
+                </form>
+            </div>
+        </div>
+    </main>
+
+
+</body>
+<script>
+    let form = document.getElementById('join-form')
+    form.addEventListener('submit' , (e ) => {
+        e.preventDefault()
+   
+    let invitcode = e.target.invite_link.value="himanshu"
+    window.location = 'video.html'; })
+</script>
+
+<script>
+    var ans = prompt("who are u ?");
+    
+    if (ans=="himanshu")
+         alert("welcome");
+    else 
+    alert("bhag ja 🥱" );    
+</script>
+
+</html>
