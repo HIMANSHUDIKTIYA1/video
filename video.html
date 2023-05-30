@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html>
+<head>
+ 
+  <title>Video Chat</title>
+  <a href="lobby.html"></a>
+  
+  <style>
+    #local-video, #remote-video {
+      width: 1000px;
+      
+      border: 1px solid white;
+     display:inline;
+    }
+    #start-button {
+      width: 67px;
+      height: 45px;
+      background-color: blueviolet;
+      color: antiquewhite;
+      border-radius: 20px;
+      border-color: rgb(212, 133, 15);
+      font-size: large;
+    }
+    body {
+      background-color: black;
+      width: 1200px;
+
+    }
+    img {
+      width: 150px;
+      height: 1100px;
+    }
+    h1 { width: 400px;
+      background-color: rgb(101, 94, 94);
+      border: 10px;
+      color: darkkhaki;
+      border-radius: 20px;
+   font-size: 50px;
+   display: inline-flex;
+    }
+  </style>
+</head>
+<body   >
+
+
+  <h1>Video Chat</h1>
+  <video id="local-video" autoplay muted></video> <br>
+  <video id="remote-video" autoplay></video>
+  <br>
+  <button id="start-button">Start</button>
+  <button id="call-button" disabled>Call</button>
+  <button id="hangup-button" disabled>Hang Up</button>
+
+  <script>
+    const localVideo = document.getElementById('local-video');
+    const remoteVideo = document.getElementById('remote-video');
+    const startButton = document.getElementById('start-button');
+    const callButton = document.getElementById('call-button');
+    const hangupButton = document.getElementById('hangup-button');
+    let localStream;
+    let remoteStream;
+    let localPeerConnection;
+    let remotePeerConnection;
+
+    startButton.addEventListener('click', start);
+    callButton.addEventListener('click', call);
+    hangupButton.addEventListener('click', hangup);
+
+    async function start() {
+      try {
+        localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+        localVideo.srcObject = localStream;
+        callButton.disabled = false;
+      } catch (error) {
+        console.error('Error accessing media devices:', error);
+      }
+    }
+
+    function call() {
+      localPeerConnection = new RTCPeerConnection();
+      remotePeerConnection = new RTCPeerConnection();
+      localStream.getTracks().forEach(track => localPeerConnection.addTrack(track, localStream));
+
+      localPeerConnection.onicecandidate = event => {
+        if (event.candidate) {
+          remotePeerConnection.addIceCandidate(event.candidate);
+        }
+      };
+
+      remotePeerConnection.onicecandidate = event => {
+        if (event.candidate) {
+          localPeerConnection.addIceCandidate(event.candidate);
+        }
+      };
+
+      remotePeerConnection.ontrack = event => {
+        if (!remoteStream) {
+          remoteStream = new MediaStream();
+          remoteVideo.srcObject = remoteStream;
+        }
+        remoteStream.addTrack(event.track);
+      };
+
+      localPeerConnection.createOffer()
+        .then(offer => localPeerConnection.setLocalDescription(offer))
+        .then(() => remotePeerConnection.setRemoteDescription(localPeerConnection.localDescription))
+        .then(() => remotePeerConnection.createAnswer())
+        .then(answer => remotePeerConnection.setLocalDescription(answer))
+        .then(() => localPeerConnection.setRemoteDescription(remotePeerConnection.localDescription))
+        .catch(error => console.error('Error creating call:', error));
+
+      hangupButton.disabled = false;
+    }
+
+    function hangup() {
+      localPeerConnection.close();
+      remotePeerConnection.close();
+      localPeerConnection = null;
+      remotePeerConnection = null;
+      hangupButton.disabled = true;
+    }
+  </script>
+</body>
+</html>
